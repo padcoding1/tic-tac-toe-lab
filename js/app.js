@@ -3,7 +3,8 @@ const squares = document.querySelectorAll(".sqr");
 
 /*-------------------------------- Variables --------------------------------*/
 let play = 1;
-let grid = ["", "", "", "", "", "", "", "", ""];
+let playerGrid = ["", "", "", "", "", "", "", "", ""];
+let win = false;
 //I did have to Google how to find win conditions.
 //I spent four hours trying a number of attempts using different
 //types of grids.
@@ -35,62 +36,90 @@ const winArray = [
 /*----------------------------- Event Listeners -----------------------------*/
 squares.forEach((square) => {
   square.addEventListener("click", (event) => {
-    // This log is for testing purposes to verify we're getting the correct value
-    console.log(event.target.innerText);
-    if (event.target.innerText === "X" || event.target.innerText === "O") {
+    if (win === true) {
+      startOver();
+    } else if (
+      event.target.innerText === "X" ||
+      event.target.innerText === "O"
+    ) {
       document.getElementById("message").innerHTML = "Can't play here!";
       return;
-    }
-    grid[event.target.innerText] = event.target.innerText;
-    console.log(grid);
-    if (play % 2 != 0) {
+    } else if (play % 2 != 0) {
+      playerGrid[event.target.innerText] = "X";
+
       document.getElementById("message").innerHTML = "Os turn";
       document.getElementById(`${event.target.innerText}`).style.color = "red";
       event.target.innerText = "X";
       play = play + 1;
-      win = checkWin(grid);
+      win = checkWin();
       if (win === true) {
-        document.getElementById("message").innerHTML = "X WINS!";
+        document.getElementById("message").innerHTML =
+          "X WINS! Click a box to reset.";
       }
     } else {
+      playerGrid[event.target.innerText] = "O";
       document.getElementById("message").innerHTML = "Xs turn";
       document.getElementById(`${event.target.innerText}`).style.color = "blue";
       event.target.innerText = "O";
       play = play + 1;
-      win = checkWin(grid);
+      win = checkWin();
       if (win === true) {
-        document.getElementById("message").innerHTML = "O WINS!";
+        document.getElementById("message").innerHTML =
+          "O WINS! Click a box to reset.";
       }
     }
   });
 });
 /*----------------------------- Functions -----------------------------*/
-function checkWin(playerGrid) {
+function checkWin() {
   let win = false;
   for (let i = 0; i < winArray.length; i++) {
     const [x, y, z] = winArray[i];
+
+    // console.log("[x,y,z] = ", [x, y, z]);
+
     if (
       playerGrid[x] &&
       playerGrid[x] === playerGrid[y] &&
       playerGrid[x] === playerGrid[z]
     ) {
       win = true;
-      break;
+      console.log("");
+      console.log("WIN CONDITION SET");
+      console.log("");
+      return win;
     }
   }
-
-  if (win) {
-    return (win = true);
-  }
-
   if (playerGrid.includes("")) {
     return;
   }
 }
 
+function startOver() {
+  console.log("statover");
+  playerGrid = ["", "", "", "", "", "", "", "", ""];
+  play = 1;
+  win = false;
+  let elements = document.querySelectorAll(".sqr");
+  document.getElementById("message").innerHTML = "";
+  for (let i = 0; i < elements.length; i++) {
+    elements[i].style.color = "gainsboro";
+    elements[i].textContent = i;
+  }
+}
 /*CODE GRAVEYARD
 
+
+
 /*
+  if (squaresClicked >= 6) {
+    win = checkWin(player1Grid, player2Grid);
+    if (win != "Player 1" && win != "Player 2") {
+        console.log("No win yet")
+    }
+    else
+        console.log(`${win} Wins!`);
+
 let testGrid = [
   [1, 0, 1],
   [1, 1, 0],
@@ -126,90 +155,4 @@ function checkWin(grid1) {
   }
 }
 checkWin(testGrid);
-*/
-
-/*calculator.addEventListener("click", (event) => {
-  if (event.target.classList.contains("number")) {
-    document.getElementById("field").innerHTML = event.target.innerText;
-    if (operatorClicked == true) {
-      secondOperandArray[numClicks] = Number(event.target.innerText);
-      numClicks += 1;
-    } else {
-      firstOperandArray[numClicks] = Number(event.target.innerText);
-      numClicks += 1;
-    }
-  }
-
-  if (event.target.classList.contains("operator")) {
-    if (operatorClicked != true) {
-      firstDigitInfo = joinDigits(firstOperandArray);
-      console.log(firstDigitInfo);
-      firstOperand = firstDigitInfo[3];
-      (document.getElementById("field").innerHTML = firstOperand),
-        " ",
-        event.target.innerText;
-    }
-  }
-
-  if (event.target.innerText === "/") {
-    operator = "divide";
-  } else if (event.target.innerText === "*") {
-    operator = "multiply";
-  } else if (event.target.innerText === "-") {
-    operator = "subtract";
-  } else if (event.target.innerText === "+") {
-    operator = "add";
-  } else if (event.target.innerText === "=") {
-    secondDigitInfo = joinDigits(secondOperandArray);
-    secondOperand = secondDigitInfo[3];
-    (document.getElementById("field").innerHTML = firstOperand),
-      " ",
-      event.target.innerText;
-    completeEquation(operator, firstOperand, secondOperand);
-    document.getElementById("field").innerHTML = total;
-  } else if (event.target.innerText === "C") {
-    document.getElementById("field").innerHTML = 0;
-    numClicks = 0;
-    firstOperand = 0;
-    secondOperand = 0;
-    joinedDigits = 0;
-    total = 0;
-    operatorClicked = false;
-    readyToEquate = false;
-    firstOperandArray = [];
-    secondOperandArray = [];
-    firstDigitInfo = [];
-    secondDigitInfo = [];
-    digitArray = [];
-  }
-});
-
-
-
-function checkWin() {
-    if()
-}
-
-
-function joinDigits(array) {
-  if (operatorClicked != true) {
-    operatorClicked = true;
-    numClicks = 0;
-  }
-  joinedDigits = Number(array.join(""));
-  digitArray = [readyToEquate, operatorClicked, numClicks, joinedDigits];
-  return digitArray;
-}
-function completeEquation(doThis, num1, num2) {
-  if (doThis === "divide") {
-    total = num1 / num2;
-  } else if (doThis === "multiply") {
-    total = num1 * num2;
-  } else if (doThis === "subtract") {
-    total = num1 - num2;
-  } else if (doThis === "add") {
-    total = num1 + num2;
-  }
-  return total;
-}
 */
